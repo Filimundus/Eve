@@ -4,10 +4,10 @@ using UnityEngine;
 using CrossWordPuzzle;
 using DG.Tweening;
 using UnityEngine.Events;
+using UnityEngine.Serialization;
 
 namespace CrossWordPuzzle
 {
-
     public struct LetterPosition
     {
         public string letterID;
@@ -21,7 +21,7 @@ namespace CrossWordPuzzle
         public static CrossWordManager instance;
 
         [Header("Settings")]
-        public ImageAlphabet customAlphaBetFile;
+        public ImageAlphabet customAlphabetFile;
         public float snapDistance = 6;
         public float snapDuration = 8;
         public Ease letterEaseType;

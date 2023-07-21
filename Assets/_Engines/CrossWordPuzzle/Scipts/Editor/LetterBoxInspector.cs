@@ -57,13 +57,13 @@ namespace CrossWordPuzzle
         {
             CrossWordManager crossWordManager = GameObject.FindObjectOfType<CrossWordManager>();
 
-            if (crossWordManager.customAlphaBetFile != null)
+            if (crossWordManager.customAlphabetFile != null)
             {
                 int index = -1;
 
-                for (int i = 0; i < crossWordManager.customAlphaBetFile.alpabetLetters.Length; i++)
+                for (int i = 0; i < crossWordManager.customAlphabetFile.alpabetLetters.Length; i++)
                 {
-                    if (crossWordManager.customAlphaBetFile.alpabetLetters[i].letterString.ToLower() == targetObject.letterID.ToLower())
+                    if (crossWordManager.customAlphabetFile.alpabetLetters[i].letterString.ToLower() == targetObject.letterID.ToLower())
                     {
                         index = i;
                         break;
@@ -72,7 +72,7 @@ namespace CrossWordPuzzle
 
                 if (index != -1)
                 {
-                    targetObject.spriteRenderer.sprite = crossWordManager.customAlphaBetFile.alpabetLetters[index].letterSprite;
+                    targetObject.spriteRenderer.sprite = crossWordManager.customAlphabetFile.alpabetLetters[index].letterSprite;
                     targetObject.gameObject.name = "Letter_" + targetObject.letterID;
                     targetObject.letterText.text = "";
                 }
