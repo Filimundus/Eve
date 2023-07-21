@@ -8,6 +8,8 @@ namespace CrossWordPuzzle
     {
         public bool useFont;
         public string letterID;
+        public LayoutSpot currentLayoutSpot;
+        public LetterPosition currentPosition;
         public SpriteRenderer spriteRenderer;
         public TMPro.TMP_Text letterText;
         public bool isGrabbed;
@@ -48,6 +50,17 @@ namespace CrossWordPuzzle
         public void Drop()
         {
             isGrabbed = false;
+        }
+
+        public void SetPosition(LetterPosition letterPosition)
+        {
+            currentPosition = letterPosition;
+        }
+
+        public void ClearPosition()
+        {
+            if(currentPosition != null)
+                currentPosition.occupied = false;
         }
     }
 }

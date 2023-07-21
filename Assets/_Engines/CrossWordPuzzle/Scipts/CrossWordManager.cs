@@ -8,11 +8,23 @@ using UnityEngine.Serialization;
 
 namespace CrossWordPuzzle
 {
-    public struct LetterPosition
+    public class LetterPosition
     {
         public string letterID;
         public Vector3 position;
         public bool occupied;
+    }
+
+    public enum CrosswordMode
+    {
+        DragOnlyCorrect,
+        DragAllThenCorrect,
+    }
+
+    public enum PoolType
+    {
+        OneByOne,
+        Several,
     }
 
     public class CrossWordManager : MonoBehaviour
@@ -22,13 +34,20 @@ namespace CrossWordPuzzle
 
         [Header("Settings")]
         public ImageAlphabet customAlphabetFile;
+        public CrosswordMode mode;
+
+        [Header("Letter Setting")]
         public float snapDistance = 6;
         public float snapDuration = 8;
         public Ease letterEaseType;
 
+        [Header("PoolType")]
+        public PoolType poolType;
+
         [Header("Events")]
         public UnityEvent onLetterCorrect;
         public UnityEvent onLetterIncorrect;
+        public UnityEvent onCrosswordFailed;
         public UnityEvent onCrosswordCompleted;
 
         private Letter current;
@@ -37,15 +56,53 @@ namespace CrossWordPuzzle
         private int currentLetterIndex;
         private List<Letter> poolOfLetters;
         private LetterPosition[] letterPositions;
+        private List<Letter> avaibleLetters;
 
-        private void Awake()
+        private void Start()
         {
             letters = GameObject.FindObjectsOfType<Letter>();
             letterPool = GameObject.FindObjectOfType<LetterPool>();
             poolOfLetters = new List<Letter>();
             RecordStartPositions();
             HideAllLetters();
-            ShowLetter();
+
+            switch(mode)
+            {
+                case CrosswordMode.DragOnlyCorrect:
+                    ShowNextLetter();
+                    break;
+                case CrosswordMode.DragAllThenCorrect:
+                    LayoutLetters();
+                    break;
+            }
+          
+        }
+
+        void LayoutLetters()
+        {
+            if(poolOfLetters.Count > 0)
+            {
+                avaibleLetters = new List<Letter>();
+
+                for (int i = 0; i < letterPool.amount; i++)
+                {
+                    if (poolOfLetters.Count > 0)
+                    {
+                        LayoutSpot layoutSpot = letterPool.GetAvaiblePosition();
+
+                        currentLetterIndex = Random.Range(0, poolOfLetters.Count);
+                        poolOfLetters[currentLetterIndex].gameObject.SetActive(true);
+                        poolOfLetters[currentLetterIndex].transform.position = layoutSpot.transform.position;
+                        poolOfLetters[currentLetterIndex].currentLayoutSpot = layoutSpot;
+                        avaibleLetters.Add(poolOfLetters[currentLetterIndex]);
+
+                        layoutSpot.isOccupied = true;
+
+                        poolOfLetters.RemoveAt(currentLetterIndex);
+                        poolOfLetters.TrimExcess();
+                    }
+                }
+            }
         }
 
         void RecordStartPositions()
@@ -64,35 +121,41 @@ namespace CrossWordPuzzle
             }
         }
 
-        void ShowLetter()
+        void ShowNextLetter()
         {
-            if(poolOfLetters.Count > 0)
+            if (poolOfLetters.Count > 0)
             {
                 currentLetterIndex = Random.Range(0, poolOfLetters.Count);
                 poolOfLetters[currentLetterIndex].gameObject.SetActive(true);
-
+                poolOfLetters[currentLetterIndex].gameObject.transform.position = letterPool.transform.position;
                 poolOfLetters.RemoveAt(currentLetterIndex);
                 poolOfLetters.TrimExcess();
             }
             else
             {
+                onCrosswordCompleted.Invoke();
                 Debug.Log("CROSSWORDPUZZLE DONE");
             }
-         
         }
 
         void HideAllLetters()
         {
-            for (int i = 0; i < letters.Length; i++)
+            for (int i = 0; i < poolOfLetters.Count; i++)
             {
-                letters[i].gameObject.SetActive(false);
-                letters[i].transform.position = letterPool.transform.position;
+                poolOfLetters[i].gameObject.SetActive(false);
+                poolOfLetters[i].transform.position = letterPool.transform.position;
             }
         }
-
         private void Update()
         {
-            MouseInput();
+            if(Application.isMobilePlatform)
+            {
+                TouchInput();
+            }
+            else
+            {
+                MouseInput();
+            }
         }
 
         void MouseInput()
@@ -146,6 +209,7 @@ namespace CrossWordPuzzle
                     {
                         current = hit.collider.gameObject.GetComponent<Letter>();
                         current.Grab();
+                        current.ClearPosition();
                     }
                 }
             }
@@ -185,27 +249,143 @@ namespace CrossWordPuzzle
                     {
                         maxDist = dist;
 
-                        if (letterPositions[i].letterID == letter.letterID && dist < snapDistance)
+                        switch(mode)
                         {
-                            index = i;
+                            case CrosswordMode.DragOnlyCorrect:
+
+                                if (letterPositions[i].letterID == letter.letterID && dist < snapDistance)
+                                {
+                                    index = i;
+                                }
+
+                                break;
+
+                            case CrosswordMode.DragAllThenCorrect:
+
+                                if (dist < snapDistance)
+                                {
+                                    index = i;
+                                }
+
+                                break;
                         }
+                     
                     }
                 }
             }
 
-            if(index != -1)
-            {
-                letter.transform.DOMove(letterPositions[index].position,snapDuration).SetEase(letterEaseType);
-                letterPositions[index].occupied = true;
-                letter.Lock();
 
-                Debug.Log("LETTERPOSITION FOUND");
-                ShowLetter();
+            switch(mode)
+            {
+                case CrosswordMode.DragOnlyCorrect:
+
+                    if (index != -1)
+                    {
+                        letter.transform.DOMove(letterPositions[index].position, snapDuration).SetEase(letterEaseType);
+                        letterPositions[index].occupied = true;
+                        letter.currentPosition = letterPositions[index];
+                        letter.Lock();
+
+                        onLetterCorrect.Invoke();
+
+                        Debug.Log("LETTERPOSITION FOUND");
+                        ShowNextLetter();
+                    }
+                    else
+                    {
+                        Debug.Log("LETTERPOSITION NOT FOUND");
+                        letter.transform.DOMove(letterPool.transform.position, snapDuration);
+                        letter.ClearPosition();
+                    }
+
+                    break;
+
+                case CrosswordMode.DragAllThenCorrect:
+
+                    if (index != -1)
+                    {
+                        letter.transform.DOMove(letterPositions[index].position, snapDuration).SetEase(letterEaseType);
+                        letter.currentPosition = letterPositions[index];
+                        letterPositions[index].occupied = true;
+                        letter.currentLayoutSpot.isOccupied = false;
+                        
+
+                        avaibleLetters.Remove(letter);
+                        avaibleLetters.TrimExcess();
+
+                        if(avaibleLetters.Count <= 0)
+                        {
+                            LayoutLetters();
+                        }
+
+                        Debug.Log("LETTERPOSITION FOUND");
+                    }
+                    else
+                    {
+                        Debug.Log("LETTERPOSITION NOT FOUND");
+
+                        letter.transform.DOMove(letter.currentLayoutSpot.transform.position, snapDuration);
+                        letter.ClearPosition();
+                    }
+
+                    break;
+            }
+
+        }
+
+        public bool IsAllLettersPlaced()
+        {
+            bool allLettersPlaced = true;
+
+            for (int i = 0; i < letterPositions.Length; i++)
+            {
+                if (letterPositions[i].occupied == false)
+                {
+                    allLettersPlaced = false;
+                    break;
+                }
+            }
+
+            return allLettersPlaced;
+        }
+
+        public void CheckIfCorrect()
+        {
+            bool allIsCorrect = true;
+            
+            List<Letter> letterInWrongPositions = new List<Letter>();
+
+            if(IsAllLettersPlaced())
+            {
+                for(int i = 0; i < letters.Length; i++)
+                {
+                    if(letters[i].letterID != letters[i].currentPosition.letterID)
+                    {
+                        letterInWrongPositions.Add(letters[i]);
+                        allIsCorrect = false;
+                    }
+                }
+            }
+
+            if(allIsCorrect)
+            {
+                Debug.Log("Crossword completed");
+                onCrosswordCompleted.Invoke();
             }
             else
             {
-                Debug.Log("LETTERPOSITION NOT FOUND");
-                letter.transform.DOMove(letterPool.transform.position, 1);
+                for(int i = 0; i < letterInWrongPositions.Count; i++)
+                {
+                    letterInWrongPositions[i].transform.DOMove(letterPool.transform.position, snapDuration);
+                    letterInWrongPositions[i].ClearPosition();
+                    poolOfLetters.Add(letterInWrongPositions[i]);
+                }
+
+                Invoke("HideAllLetters",snapDuration);
+                Invoke("LayoutLetters",snapDuration+0.1f);
+
+                onCrosswordFailed.Invoke();
+                Debug.Log("Crossword not completed");
             }
         }
     }
