@@ -1,0 +1,61 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f1b0de247350e2c4797acf086faa0812, type: 3}
+  m_Name: CustomAlphaBet
+  m_EditorClassIdentifier: 
+  alpabetLetters:
+  - letterString: a
+    letterSprite: {fileID: 1600799356, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: b
+    letterSprite: {fileID: 1394627799, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: c
+    letterSprite: {fileID: 0}
+  - letterString: d
+    letterSprite: {fileID: 0}
+  - letterString: e
+    letterSprite: {fileID: 0}
+  - letterString: f
+    letterSprite: {fileID: 0}
+  - letterString: g
+    letterSprite: {fileID: -1244304620, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: h
+    letterSprite: {fileID: 0}
+  - letterString: i
+    letterSprite: {fileID: 69862050, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: j
+    letterSprite: {fileID: -1744166695, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: k
+    letterSprite: {fileID: 2101617698, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: l
+    letterSprite: {fileID: -994077257, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: m
+    letterSprite: {fileID: 0}
+  - letterString: n
+    letterSprite: {fileID: 791621489, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: o
+    letterSprite: {fileID: 1580370909, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: p
+    letterSprite: {fileID: -1690754697, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: q
+    letterSprite: {fileID: 0}
+  - letterString: r
+    letterSprite: {fileID: 0}
+  - letterString: s
+    letterSprite: {fileID: 1149334296, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: t
+    letterSprite: {fileID: -1791305585, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: u
+    letterSprite: {fileID: 0}
+  - letterString: v
+    letterSprite: {fileID: -762687947, guid: 45d9c20daa423c741827e11a7d8c8411, type: 3}
+  - letterString: w
+    letterSprite: {fileID: 0}
