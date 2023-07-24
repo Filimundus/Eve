@@ -22,6 +22,7 @@ namespace DiceGame
 
         public PlayerPawn[] playerPawns;
         public PlayerPawn currentPawnSelected;
+        public TMPro.TMP_Text diceDebugText;
         public static DiceGameManager instance;
         private Camera mainCam;
 
@@ -31,8 +32,17 @@ namespace DiceGame
             mainCam = Camera.main;
         }
 
+        void SetupMoveSpots()
+        {
+            for(int i = 0; i < moveSpots.Length; i++)
+            {
+                moveSpots[i].moveSpotIndex = i;
+            }
+        }
+
         private void Start()
         {
+            SetupMoveSpots();
             GetAvaiblePawns();
         }
 
@@ -44,7 +54,7 @@ namespace DiceGame
         public void RollDice()
         {
             currentNumber = Random.Range(minDiceNumber, maxDiceNumber);
-
+            diceDebugText.text = ""+currentNumber;
             onDiceRolled.Invoke();
         }
 
@@ -53,6 +63,7 @@ namespace DiceGame
             if(Input.GetKeyDown("r"))
             {
                 RollDice();
+                MovePawnAlongPath(currentPawnSelected);
             }
 
             if(Application.isMobilePlatform)
@@ -90,6 +101,24 @@ namespace DiceGame
                     currentPawnSelected.transform.position = point;
                 }
              
+            }
+        }
+
+        void MovePawnAlongPath(PlayerPawn pawnToMove)
+        {
+            if (pawnToMove.isComputer)
+            {
+                List<MoveSpot> path = new List<MoveSpot>();
+
+                int startIndex = pawnToMove.currentMoveSpot.moveSpotIndex + 1;
+                int endIndex = startIndex + currentNumber;
+
+                for (int i = startIndex; i < endIndex; i++)
+                {
+                    path.Add(moveSpots[i]);
+                }
+
+                pawnToMove.MoveToSlot(path.ToArray());
             }
         }
 

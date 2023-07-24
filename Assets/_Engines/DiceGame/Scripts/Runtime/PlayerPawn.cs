@@ -1,7 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-
+using DG.Tweening;
 
 namespace DiceGame
 {
@@ -9,23 +9,42 @@ namespace DiceGame
     {
         public bool isGrabbed;
         public bool isSelectable;
+        public bool isComputer;
         public MoveSpot currentMoveSpot;
-
+        private bool isMoving;
 
         private void Start()
         {
             currentMoveSpot = DiceGameManager.instance.GetClosestMoveSpotFromPosition(transform.position);
             SnapToMoveSpot();
-
-
         }
 
         void SnapToMoveSpot()
+        { 
+            currentMoveSpot = DiceGameManager.instance.GetClosestMoveSpotFromPosition(transform.position);
+            transform.position = currentMoveSpot.transform.position;
+        }
+
+        public void MoveToSlot(MoveSpot[] path)
         {
-            if(currentMoveSpot)
+            if (isMoving)
+                return;
+            StartCoroutine("MoveAlongPath",path);
+        }
+
+        IEnumerator MoveAlongPath(MoveSpot[] path)
+        {
+            isMoving = true;
+
+            for (int i = 0; i < path.Length; i++)
             {
-                transform.position = currentMoveSpot.transform.position;
+                transform.DOJump(path[i].transform.position,1,1,0.5f).OnComplete(SnapToMoveSpot);
+
+                yield return new WaitForSeconds(0.8f);
+
             }
+
+            isMoving = false;
         }
 
         public void Grab()
@@ -36,8 +55,6 @@ namespace DiceGame
         public void Drop()
         {
             isGrabbed = false;
-
-            currentMoveSpot = DiceGameManager.instance.GetClosestMoveSpotFromPosition(transform.position);
             SnapToMoveSpot();
         }
     }
