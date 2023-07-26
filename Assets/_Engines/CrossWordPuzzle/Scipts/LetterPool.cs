@@ -10,25 +10,30 @@ namespace CrossWordPuzzle
     {
         [Header("Settings")]
 
-        public List<LayoutSpot> layoutSpots;
+        public bool useAllLetters;
         public int amount;
         public float spacing;
-        public Vector2 layoutArea;
         public GameObject layoutSpotPrefab;
-        private SpriteRenderer spriteRenderer;
         public List<Vector2> points;
-        public float radius;
+
+        [HideInInspector]
+        public List<LayoutSpot> layoutSpots;
+        [HideInInspector]
         public bool poolDone;
+
+        public int limit = 200;
+        [HideInInspector]
+        public int numberOfTries;
+        private SpriteRenderer spriteRenderer;
 
         private void Awake()
         {
             spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
             spriteRenderer.enabled = false;
-
-           StartCoroutine("SlotPositioning");
+            GenerateLayoutSpots();
         }
 
-        void GenerateLayout()
+        void GenerateLayoutSpots()
         {
             layoutSpots = new List<LayoutSpot>();
 
@@ -61,29 +66,43 @@ namespace CrossWordPuzzle
             return avaibleSpot;
         }
 
-        public void OnDrawGizmos()
+        public void GeneratePoolPositions()
         {
-            layoutArea = new Vector2(transform.localScale.x, transform.localScale.y);
-            Gizmos.DrawWireCube(transform.position, new Vector3(layoutArea.x, layoutArea.y, 0));
-        }
 
-        IEnumerator SlotPositioning()
-        {
-            points.Clear();
+            if (useAllLetters)
+                amount = GameObject.FindObjectsOfType<Letter>().Length;
+
             for (int i = 0; i < amount; i++)
             {
                 Vector2 newPoint = GetRandomPoint();
                 while (PointTooClose(newPoint))
                 {
                     newPoint = GetRandomPoint();
-                    yield return null;
+                    numberOfTries++;
+
+
+                    if (numberOfTries > limit)
+                    {
+                        spacing -= 0.1f;
+
+                        if (spacing < 0)
+                        {
+                            spacing = 0;
+                        }
+
+                        numberOfTries = 0;
+                    }
                 }
+                numberOfTries = 0;
                 points.Add(newPoint);
             }
 
-            GenerateLayout();
-
             poolDone = true;
+        }
+
+        public void ClearPoolPositions()
+        {
+            points.Clear();
         }
 
         private Vector2 GetRandomPoint()
@@ -108,5 +127,20 @@ namespace CrossWordPuzzle
             }
             return false;
         }
+
+        private void OnDrawGizmos()
+        {
+            if(points != null && points.Count > 0)
+            {
+                Gizmos.color = Color.blue;
+
+                for(int i = 0; i < points.Count; i++)
+                {
+                    Gizmos.DrawSphere(points[i], 0.25f);
+                }
+            }
+        }
     }
+
+    
 }

@@ -12,6 +12,7 @@ namespace CrossWordPuzzle
     {
         public string letterID;
         public Vector3 position;
+        public Vector3 startScale;
         public bool occupied;
     }
 
@@ -40,6 +41,8 @@ namespace CrossWordPuzzle
         public float snapDistance = 6;
         public float snapDuration = 8;
         public Ease letterEaseType;
+        public bool customLetterSize;
+        public float letterSizePercent;
 
         [Header("PoolType")]
         public PoolType poolType;
@@ -104,6 +107,7 @@ namespace CrossWordPuzzle
                         poolOfLetters[currentLetterIndex].gameObject.SetActive(true);
                         poolOfLetters[currentLetterIndex].transform.position = layoutSpot.transform.position;
                         poolOfLetters[currentLetterIndex].currentLayoutSpot = layoutSpot;
+                        poolOfLetters[currentLetterIndex].transform.localScale = poolOfLetters[currentLetterIndex].startScale * (letterSizePercent/100);
                         avaibleLetters.Add(poolOfLetters[currentLetterIndex]);
 
                         layoutSpot.isOccupied = true;
@@ -124,6 +128,7 @@ namespace CrossWordPuzzle
                 LetterPosition lp = new LetterPosition();
                 lp.position = letters[i].transform.position;
                 lp.letterID = letters[i].letterID;
+                lp.startScale = letters[i].transform.localScale;
 
                 letterPositions[i] = lp;
 
@@ -219,6 +224,7 @@ namespace CrossWordPuzzle
                     {
                         current = hit.collider.gameObject.GetComponent<Letter>();
                         current.Grab();
+                        current.transform.localScale = current.startScale;
                         current.ClearPosition();
                     }
                 }
@@ -305,6 +311,7 @@ namespace CrossWordPuzzle
                     {
                         Debug.Log("LETTERPOSITION NOT FOUND");
                         letter.transform.DOMove(letterPool.transform.position, snapDuration);
+                        letter.transform.localScale = letter.startScale * (letterSizePercent/100);
                         letter.ClearPosition();
                     }
 
@@ -335,6 +342,7 @@ namespace CrossWordPuzzle
                         Debug.Log("LETTERPOSITION NOT FOUND");
 
                         letter.transform.DOMove(letter.currentLayoutSpot.transform.position, snapDuration);
+                        letter.transform.localScale = letter.startScale * (letterSizePercent / 100);
                         letter.ClearPosition();
                     }
 

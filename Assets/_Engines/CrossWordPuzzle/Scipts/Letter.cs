@@ -12,6 +12,7 @@ namespace CrossWordPuzzle
         public LetterPosition currentPosition;
         public SpriteRenderer spriteRenderer;
         public TMPro.TMP_Text letterText;
+        public Vector3 startScale;
         public bool isGrabbed;
         public bool isLocked;
 
@@ -19,6 +20,7 @@ namespace CrossWordPuzzle
         {
             spriteRenderer = gameObject.GetComponent<SpriteRenderer>();
             letterText = gameObject.GetComponentInChildren<TMPro.TMP_Text>();
+            startScale = transform.localScale;
         }
 
         public void SetSprite(Sprite sprite)
