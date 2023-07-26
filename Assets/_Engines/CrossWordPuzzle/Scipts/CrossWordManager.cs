@@ -66,7 +66,18 @@ namespace CrossWordPuzzle
             RecordStartPositions();
             HideAllLetters();
 
-            switch(mode)
+            StartCoroutine("WaitForLayout");
+        }
+
+        IEnumerator WaitForLayout()
+        {
+            while(letterPool.poolDone == false)
+            {
+                yield return null;
+            }
+
+
+            switch (mode)
             {
                 case CrosswordMode.DragOnlyCorrect:
                     ShowNextLetter();
@@ -75,7 +86,6 @@ namespace CrossWordPuzzle
                     LayoutLetters();
                     break;
             }
-          
         }
 
         void LayoutLetters()
