@@ -29,6 +29,7 @@ namespace DiceGame
         {
             if (isMoving)
                 return;
+
             StartCoroutine("MoveAlongPath",path);
         }
 
@@ -42,6 +43,13 @@ namespace DiceGame
 
                 yield return new WaitForSeconds(0.8f);
 
+            }
+
+            if(path[path.Length-1].alternativePath != null)
+            {
+                transform.DOJump(path[path.Length - 1].alternativePath.transform.position, 1, 1, 0.5f).OnComplete(SnapToMoveSpot);
+
+                yield return new WaitForSeconds(0.8f);
             }
 
             isMoving = false;

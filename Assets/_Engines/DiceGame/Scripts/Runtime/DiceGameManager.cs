@@ -23,6 +23,8 @@ namespace DiceGame
         public PlayerPawn[] playerPawns;
         public PlayerPawn currentPawnSelected;
         public TMPro.TMP_Text diceDebugText;
+        public MoveToMarker moveToMarker;
+        public MoveSpot[] currentPath;
         public static DiceGameManager instance;
         private Camera mainCam;
 
@@ -30,6 +32,7 @@ namespace DiceGame
         {
             instance = this;
             mainCam = Camera.main;
+            moveSpots = GameObject.FindObjectsOfType<MoveSpot>();
         }
 
         void SetupMoveSpots()
@@ -100,25 +103,42 @@ namespace DiceGame
                     point.z = currentPawnSelected.transform.position.z;
                     currentPawnSelected.transform.position = point;
                 }
-             
             }
+        }
+
+        List<MoveSpot> GeneratePath(PlayerPawn pawnToMove, int number)
+        {
+            List<MoveSpot> path = new List<MoveSpot>();
+            int count = number;
+            MoveSpot currentSpot = pawnToMove.currentMoveSpot.nextMoveSpot;
+
+
+            while (count > 0)
+            {
+                if (currentSpot != null)
+                    path.Add(currentSpot);
+
+                count--;
+
+                if (currentSpot.nextMoveSpot)
+                    currentSpot = currentSpot.nextMoveSpot;
+            }
+
+            return path;
         }
 
         void MovePawnAlongPath(PlayerPawn pawnToMove)
         {
             if (pawnToMove.isComputer)
             {
-                List<MoveSpot> path = new List<MoveSpot>();
+                pawnToMove.MoveToSlot(GeneratePath(pawnToMove,currentNumber).ToArray());
+            }
+            else
+            {
+                currentPath = GeneratePath(pawnToMove,currentNumber).ToArray();
 
-                int startIndex = pawnToMove.currentMoveSpot.moveSpotIndex + 1;
-                int endIndex = startIndex + currentNumber;
-
-                for (int i = startIndex; i < endIndex; i++)
-                {
-                    path.Add(moveSpots[i]);
-                }
-
-                pawnToMove.MoveToSlot(path.ToArray());
+                moveToMarker.transform.position = currentPath[currentPath.Length - 1].transform.position - Vector3.forward*0.1f;
+                moveToMarker.Flash();
             }
         }
 
