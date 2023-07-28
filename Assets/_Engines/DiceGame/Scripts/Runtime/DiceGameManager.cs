@@ -12,6 +12,7 @@ namespace DiceGame
         [Header("Settings")]
         public MoveSpot[] moveSpots;
         public List<MoveSpot> avaibleSpots;
+        public AudioClip[] numberSounds;
 
         public int maxDiceNumber;
         public int minDiceNumber;
@@ -27,12 +28,22 @@ namespace DiceGame
         public MoveSpot[] currentPath;
         public static DiceGameManager instance;
         private Camera mainCam;
+        private AudioSource _audioSource;
 
         private void Awake()
         {
             instance = this;
             mainCam = Camera.main;
             moveSpots = GameObject.FindObjectsOfType<MoveSpot>();
+
+            CreateAudioSource();
+
+
+        }
+
+        void CreateAudioSource()
+        {
+            _audioSource = gameObject.AddComponent<AudioSource>();
         }
 
         void SetupMoveSpots()
@@ -186,9 +197,49 @@ namespace DiceGame
             if(currentPawnSelected)
             {
                 currentPawnSelected.Drop();
+                int index = GetMoveSpotIndex(currentPawnSelected.currentMoveSpot);
+
+                if(index > -1)
+                {
+                    _audioSource.PlayOneShot(numberSounds[index]);
+                }
             }
         }
-        
+
+        public MoveSpot GetClosestMoveSpotFromCurrentPath(Vector3 position)
+        {
+            MoveSpot moveSpotFound = null;
+            float dist = Mathf.Infinity;
+
+            for (int i = 0; i < currentPath.Length; i++)
+            {
+                float currentDistance = Vector3.Distance(position, currentPath[i].transform.position);
+
+                if (currentDistance < dist)
+                {
+                    moveSpotFound = currentPath[i];
+                    dist = currentDistance;
+                }
+            }
+
+            return moveSpotFound;
+        }
+
+        int GetMoveSpotIndex(MoveSpot moveSpot)
+        {
+            int indexFound = -1;
+
+            for(int i = 0; i < currentPath.Length; i++)
+            {
+                if(currentPath[i] == moveSpot)
+                {
+                    indexFound = i;
+                }
+            }
+
+            return indexFound;
+        }
+
         private void OnDrawGizmos()
         {
             if(moveSpots !=null && moveSpots.Length > 1)

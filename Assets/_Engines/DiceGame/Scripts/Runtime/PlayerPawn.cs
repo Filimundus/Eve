@@ -25,6 +25,12 @@ namespace DiceGame
             transform.position = currentMoveSpot.transform.position;
         }
 
+        void SnapToMoveSpotOnPath()
+        {
+            currentMoveSpot = DiceGameManager.instance.GetClosestMoveSpotFromCurrentPath(transform.position);
+            transform.position = currentMoveSpot.transform.position;
+        }
+
         public void MoveToSlot(MoveSpot[] path)
         {
             if (isMoving)
@@ -63,7 +69,9 @@ namespace DiceGame
         public void Drop()
         {
             isGrabbed = false;
-            SnapToMoveSpot();
+
+            if(DiceGameManager.instance.currentPath != null && DiceGameManager.instance.currentPath.Length > 0)
+                SnapToMoveSpotOnPath();
         }
     }
 
